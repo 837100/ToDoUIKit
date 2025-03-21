@@ -13,6 +13,10 @@ class TodoTableViewController: UITableViewController {
     // MARK: - Properties
     private var items: [TodoItem] = []
     
+    // 카테고리 별로
+    private var categorizedItems: [String: [TodoItem]] = [:]
+    private var categories: [String] = []
+    
     private var persistentContainer =
     (UIApplication.shared.delegate as! AppDelegate).persistentContainer
     
@@ -44,7 +48,8 @@ class TodoTableViewController: UITableViewController {
             let touchPoint = gestureRecognizer.location(in: tableView)
             if let indexPath = tableView.indexPathForRow(at: touchPoint) {
                 // 선택된 할 일 가져오기
-                let selectedItem = items[indexPath.row]
+                let category = categories[indexPath.section]
+                let selectedItem = categorizedItems[category]![indexPath.row]
                 // 수정 화면 표시
                 editTodoItem(selectedItem)
             }
@@ -65,16 +70,6 @@ class TodoTableViewController: UITableViewController {
         loadTodoItems()
     }
     
-    //    private func fetchTodos() {
-    //        let request = TodoItemEntity.fetchRequest()
-    //
-    //        do {
-    //            items = try viewContext.fetch(request).compactMap { TodoItem.from($0) }
-    //            tableView.reloadData()
-    //        } catch {
-    //            print("Fetching error \(error)")
-    //        }
-    //    }
     func configureNavigation() {
         title = "할 일"
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -94,7 +89,24 @@ class TodoTableViewController: UITableViewController {
         present(navigationController, animated: true)
     }
     
-    // Read
+    private func organizeCategorizedItems() {
+        categorizedItems.removeAll()
+        categories.removeAll()
+        
+        for item in items {
+            let category = item.category
+            
+            if categorizedItems[category] == nil {
+                categorizedItems[category] = []
+                categories.append(category)
+            }
+            
+            categorizedItems[category]?.append(item)
+            
+        }
+        categories.sort()
+    }
+    
     private func loadTodoItems() {
         let request: NSFetchRequest<TodoItemEntity> =
         TodoItemEntity.fetchRequest()
@@ -106,13 +118,13 @@ class TodoTableViewController: UITableViewController {
         do {
             let result = try viewContext.fetch(request)
             items = result.compactMap { TodoItem.from($0) }
+            organizeCategorizedItems()
             tableView.reloadData()
         } catch {
             print("데이터를 불러오는데 실패했습니다.")
         }
     }
     
-    // Update
     private func saveTodoItem(_ item: TodoItem) {
         let _ = item.toManagedObject(in: viewContext)
         
@@ -124,7 +136,7 @@ class TodoTableViewController: UITableViewController {
         }
     }
     
-    // Delete
+    
     private func deleteTodoItem(_ item: TodoItem) {
         let request: NSFetchRequest<TodoItemEntity> =
         TodoItemEntity.fetchRequest()
@@ -146,14 +158,16 @@ class TodoTableViewController: UITableViewController {
     // MARK: - Table view data source
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
-        return 1
+        return categories.count
     }
     
-    override func tableView(
-        _ tableView: UITableView, numberOfRowsInSection section: Int
-    ) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return items.count
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return categories[section]
+    }
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        let category = categories[section]
+        return categorizedItems[category]?.count ?? 0
     }
     
     override func tableView(
@@ -161,12 +175,10 @@ class TodoTableViewController: UITableViewController {
     ) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(
             withIdentifier: "reuseIdentifier", for: indexPath)
-        
-        let item = items[indexPath.row]
+        let category = categories[indexPath.section]
+        let item = categorizedItems[category]![indexPath.row]
         
         var content = cell.defaultContentConfiguration()
-        
-        //        let checkButton = UIButton(type: .system)
         content.image = UIImage(
             systemName: item.isDone ? "checkmark.circle.fill" : "circle")
         
@@ -189,13 +201,10 @@ class TodoTableViewController: UITableViewController {
         return cell
     }
     
-    override func tableView(
-        _ tableView: UITableView,
-        commit editingStyle: UITableViewCell.EditingStyle,
-        forRowAt indexPath: IndexPath
-    ) {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            let item = items[indexPath.row]
+            let category = categories[indexPath.section]
+            let item = categorizedItems[category]![indexPath.row]
             deleteTodoItem(item)
         }
     }
@@ -204,7 +213,8 @@ class TodoTableViewController: UITableViewController {
         _ tableView: UITableView, didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
-        var selectedItem = items[indexPath.row]
+        let category = categories[indexPath.section]
+        let selectedItem = categorizedItems[category]![indexPath.row]
         toggleItemCompletion(selectedItem)
     }
     
