@@ -101,8 +101,22 @@ class TodoTableViewCell: UITableViewCell {
         // 체크마크 이미지 설정
         let imageName = item.isDone ? "checkmark.circle.fill" : "circle"
         checkmarkButton.setImage(UIImage(systemName: imageName), for: .normal)
-        checkmarkButton.tintColor = item.isDone ? .systemGreen : .systemGray
+        checkmarkButton.tintColor = .systemGray
         
+        contentView.backgroundColor = item.isDone ? .systemGray.withAlphaComponent(0.5) : .white
+        if !item.isDone {
+            switch item.priority {
+            case "Low":
+                priorityLabel.textColor = .systemGreen
+            case "Medium":
+                priorityLabel.textColor = .systemYellow
+            case "High":
+                priorityLabel.textColor = .systemRed
+            default:
+                priorityLabel.textColor = .clear
+                break
+            }
+        }
         // 텍스트 설정
         titleLabel.text = item.todo
         
@@ -123,6 +137,9 @@ class TodoTableViewCell: UITableViewCell {
 }
 
 
+#Preview {
+    UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()!
+}
 
 
 
