@@ -12,9 +12,7 @@ class TodoTableViewController: UITableViewController {
 
     
     // MARK: - Properties
-    private var items: [TodoItem] = [
-
-        ]
+    private var items: [TodoItem] = []
     
     private var persistentContainer = (UIApplication.shared.delegate as! AppDelegate).persistentContainer
     
@@ -35,7 +33,21 @@ class TodoTableViewController: UITableViewController {
         )
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        loadTodoItems()
+    }
     
+//    private func fetchTodos() {
+//        let request = TodoItemEntity.fetchRequest()
+//        
+//        do {
+//            items = try viewContext.fetch(request).compactMap { TodoItem.from($0) }
+//            tableView.reloadData()
+//        } catch {
+//            print("Fetching error \(error)")
+//        }
+//    }
     func configureNavigation() {
         title = "할 일"
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -63,12 +75,7 @@ class TodoTableViewController: UITableViewController {
         do {
             let result = try viewContext.fetch(request)
             items = result.compactMap { TodoItem.from($0) }
-            
-            if items.isEmpty {
-                let dummyItems = [TodoItem(id: UUID(), todo: "Swift 공부하기", isDone: false, setTime: Date(), category: "Swift", priority: "High", createdAt: Date()),
-                TodoItem(id: UUID(), todo: "UIKit 공부하기", isDone: false, setTime: Date(), category: "UIKit", priority: "High", createdAt: Date()),]
-                dummyItems.forEach { saveTodoItem($0) }
-            }
+            tableView.reloadData()
         } catch {
             print("데이터를 불러오는데 실패했습니다.")
         }
@@ -123,7 +130,7 @@ class TodoTableViewController: UITableViewController {
         
         var content = cell.defaultContentConfiguration()
         
-        let checkButton = UIButton(type: .system)
+//        let checkButton = UIButton(type: .system)
         content.image = UIImage(systemName: item.isDone ? "checkmark.circle.fill" : "circle")
         
         content.text = item.todo
