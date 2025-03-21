@@ -25,6 +25,12 @@ class TodoAddViewController: UIViewController {
             action: #selector(cancelButtonTapped)
         )
         
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .save,
+            target: self,
+            action: #selector(saveButtonTapped)
+        )
+        
         if editMode, let item = todoItemToEdit {
             fillFieds(with: item)
         }
@@ -71,15 +77,6 @@ class TodoAddViewController: UIViewController {
         return segmentdControl
     }()
     
-    
-    private let saveButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("저장", for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
-        return button
-    }()
-    
     private let categoryTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "카테고리를 입력해주세요"
@@ -94,7 +91,6 @@ class TodoAddViewController: UIViewController {
         view.addSubview(categoryTextField)
         view.addSubview(datePicker)
         view.addSubview(prioritySegmentdControl)
-        view.addSubview(saveButton)
         NSLayoutConstraint.activate([
             titleTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             titleTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
@@ -111,14 +107,7 @@ class TodoAddViewController: UIViewController {
             prioritySegmentdControl.topAnchor.constraint(equalTo: datePicker.bottomAnchor, constant: 20),
             prioritySegmentdControl.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
             prioritySegmentdControl.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            
-            saveButton.topAnchor.constraint(equalTo: prioritySegmentdControl.bottomAnchor, constant: 20),
-            saveButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            saveButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            saveButton.heightAnchor.constraint(equalToConstant: 44)
         ])
-        
-        
     }
     
     @objc func saveButtonTapped() {

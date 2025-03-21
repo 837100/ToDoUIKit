@@ -85,7 +85,7 @@ class TodoTableViewCell: UITableViewCell {
             
             contentStack.leadingAnchor.constraint(equalTo: checkmarkButton.trailingAnchor, constant: 12),
             contentStack.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            contentStack.trailingAnchor.constraint(equalTo: priorityLabel.leadingAnchor, constant: -12),
+            contentStack.trailingAnchor.constraint(equalTo: priorityLabel.trailingAnchor, constant: -12),
             
             priorityLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             priorityLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
@@ -105,9 +105,13 @@ class TodoTableViewCell: UITableViewCell {
         
         // 텍스트 설정
         titleLabel.text = item.todo
-        dateLabel.text = item.setTime.description
+        
+        // 날짜 포맷 설정
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+        dateLabel.text = dateFormatter.string(from: item.setTime)
         priorityLabel.text = item.priority
-}
+    }
     
     @objc private func checkmarkTapped() {
         delegate?.checkmarkTapped(for: self)
