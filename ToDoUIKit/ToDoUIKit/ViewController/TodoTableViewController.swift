@@ -37,24 +37,13 @@ class TodoTableViewController: UITableViewController {
             action: #selector(addTodoItem)
         )
         
-        let longPressGesture = UILongPressGestureRecognizer(
-            target: self,
-            action: #selector(handleLongPress))
-        tableView.addGestureRecognizer(longPressGesture)
-        
     }
     
-    @objc private func handleLongPress(_ gestureRecognizer: UILongPressGestureRecognizer) {
-        if gestureRecognizer.state == .began {
-            let touchPoint = gestureRecognizer.location(in: tableView)
-            if let indexPath = tableView.indexPathForRow(at: touchPoint) {
-                // 선택된 할 일 가져오기
-                let category = categories[indexPath.section]
-                let selectedItem = categorizedItems[category]![indexPath.row]
-                // 수정 화면 표시
-                editTodoItem(selectedItem)
-            }
-        }
+    func configureTableView() {
+        // 커스텀 셀 등록
+        tableView.register(
+            TodoTableViewCell.self, forCellReuseIdentifier: TodoTableViewCell.reuseIdentifier)
+        tableView.rowHeight = 60
     }
     
     private func editTodoItem(_ item: TodoItem) {
@@ -76,11 +65,6 @@ class TodoTableViewController: UITableViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
     }
     
-    func configureTableView() {
-        tableView.register(
-            UITableViewCell.self, forCellReuseIdentifier: "reuseIdentifier")
-        tableView.rowHeight = 60
-    }
     
     @objc private func addTodoItem() {
         let addVC = TodoAddViewController()
@@ -174,30 +158,15 @@ class TodoTableViewController: UITableViewController {
     override func tableView(
         _ tableView: UITableView, cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(
-            withIdentifier: "reuseIdentifier", for: indexPath)
-        let category = categories[indexPath.section]
+       guard let cell = tableView.dequeueReusableCell(
+        withIdentifier: TodoTableViewCell.reuseIdentifier, for: indexPath) as? TodoTableViewCell else {
+        return UITableViewCell()
+       }
+           let category = categories[indexPath.section]
         let item = categorizedItems[category]![indexPath.row]
         
-        var content = cell.defaultContentConfiguration()
-        content.image = UIImage(
-            systemName: item.isDone ? "checkmark.circle.fill" : "circle")
-        
-        content.text = item.todo
-        content.secondaryText = item.setTime.description
-        
-        content.imageProperties.maximumSize = CGSize(width: 30, height: 20)
-        
-        content.imageProperties.tintColor =
-        item.isDone ? .systemGreen : .systemGray
-        
-        cell.contentConfiguration = content
-        // 오른쪽에 중요도 표시를 위한 레이블 추가
-        let priorityLabel = UILabel()
-        priorityLabel.text = item.priority
-        priorityLabel.textColor = .systemGray
-        priorityLabel.sizeToFit()
-        cell.accessoryView = priorityLabel
+        cell.configure(with: item)
+        cell.delegate = self
         
         return cell
     }
@@ -214,9 +183,9 @@ class TodoTableViewController: UITableViewController {
         _ tableView: UITableView, didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let category = categories[indexPath.section]
-        let selectedItem = categorizedItems[category]![indexPath.row]
-        toggleItemCompletion(selectedItem)
+//        let category = categories[indexPath.section]
+//        let selectedItem = categorizedItems[category]![indexPath.row]
+//        toggleItemCompletion(selectedItem)
     }
     
     private func toggleItemCompletion(_ item: TodoItem) {
@@ -248,7 +217,23 @@ class TodoTableViewController: UITableViewController {
     
 }
 
-extension TodoTableViewController: UISearchResultsUpdating {
+extension TodoTableViewController: UISearchResultsUpdating, TodoCellDelegate {
+    func checkmarkTapped(for cell: TodoTableViewCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        
+        let category = categories[indexPath.section]
+        let selectedItem = categorizedItems[category]![indexPath.row]
+        toggleItemCompletion(selectedItem)
+    }
+    
+    func cellContentTapped(for cell: TodoTableViewCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        
+        let category = categories[indexPath.section]
+        let selectedItem = categorizedItems[category]![indexPath.row]
+        editTodoItem(selectedItem)
+    }
+    
     // 검색 컨트롤러 설정
     func configureSearchController() {
         let searchController = UISearchController()
@@ -290,6 +275,8 @@ extension TodoTableViewController: UISearchResultsUpdating {
         searchTodoItems(todo)
     }
 }
+
+
 
 #Preview {
     UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()!
