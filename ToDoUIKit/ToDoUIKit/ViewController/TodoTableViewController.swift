@@ -29,6 +29,7 @@ class TodoTableViewController: UITableViewController {
         configureNavigation()
         configureTableView()
         loadTodoItems()
+        configureSearchController()
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .add,
@@ -246,6 +247,50 @@ class TodoTableViewController: UITableViewController {
     }
     
 }
+
+extension TodoTableViewController: UISearchResultsUpdating {
+    // 검색 컨트롤러 설정
+    func configureSearchController() {
+        let searchController = UISearchController()
+        searchController.searchResultsUpdater = self
+        searchController.searchBar.placeholder = "검색"
+        navigationItem.searchController = searchController
+        
+        // 네비게이션 바에 검색바가 숨겨지지 않도록 설정
+        navigationItem.hidesSearchBarWhenScrolling = false
+        
+        // 검색 결과 화면을 현재 뷰 컨트롤러로 설정
+        definesPresentationContext = true
+    }
+    
+    // 검색 기능 구현
+    func searchTodoItems(_ todo: String) {
+        // 검색어가 없을 때 전체 데이터 로드
+        if todo.isEmpty {
+            loadTodoItems()
+            return
+        }
+        
+        let request: NSFetchRequest<TodoItemEntity> = TodoItemEntity.fetchRequest()
+        
+        request.predicate = NSPredicate(format: "todo CONTAINS[cd] %@", todo)
+        
+        do {
+            let result = try viewContext.fetch(request)
+            items = result.compactMap { TodoItem.from($0) }
+            organizeCategorizedItems()
+            tableView.reloadData()
+        } catch {
+            print("검색 실패: \(error)")
+        }
+    }
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let todo = searchController.searchBar.text else { return }
+        searchTodoItems(todo)
+    }
+}
+
 #Preview {
     UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()!
 }
