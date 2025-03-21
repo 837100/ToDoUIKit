@@ -10,17 +10,37 @@ import CoreData
 
 class TodoAddViewController: UIViewController {
     
+    var editMode = false
+    var todoItemToEdit: TodoItem?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         view.backgroundColor = .systemBackground
-        title = "할 일 추가"
+        title = editMode ? "할 일 수정" : "할 일 추가"
+        
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .cancel,
             target: self,
             action: #selector(cancelButtonTapped)
         )
+        
+        if editMode, let item = todoItemToEdit {
+            fillFieds(with: item)
+        }
     }
+    
+    private func fillFieds(with item: TodoItem) {
+        titleTextField.text = item.todo
+        datePicker.date = item.setTime
+        categoryTextField.text = item.category
+        
+        let priorities = ["Low", "Medium", "High"]
+        if let priorityIndex = priorities.firstIndex(of: item.priority) {
+            prioritySegmentdControl.selectedSegmentIndex = priorityIndex
+        }
+    }
+    
     
     private var persistentContainer = (UIApplication.shared.delegate as! AppDelegate).persistentContainer
     
@@ -97,15 +117,15 @@ class TodoAddViewController: UIViewController {
             saveButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             saveButton.heightAnchor.constraint(equalToConstant: 44)
         ])
-
-
+        
+        
     }
     
     @objc func saveButtonTapped() {
         guard let todo = titleTextField.text, !todo.isEmpty else { return }
         let priorities = ["Low", "Medium", "High"]
         let selectedPriority = priorities[prioritySegmentdControl.selectedSegmentIndex]
-
+        
         let newTodo = TodoItemEntity(context: viewContext)
         newTodo.id = UUID()
         newTodo.todo = todo
