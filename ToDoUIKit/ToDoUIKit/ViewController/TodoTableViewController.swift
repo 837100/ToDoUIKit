@@ -40,6 +40,8 @@ class TodoTableViewController: UITableViewController {
     }
     
     func configureTableView() {
+        
+        tableView = UITableView(frame: view.bounds, style: .insetGrouped)
         // 커스텀 셀 등록
         tableView.register(
             TodoTableViewCell.self, forCellReuseIdentifier: "reuseIdentifier")
@@ -172,6 +174,7 @@ class TodoTableViewController: UITableViewController {
         return cell
     }
     
+    // 삭제 기능 구현
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             let category = categories[indexPath.section]
@@ -180,13 +183,11 @@ class TodoTableViewController: UITableViewController {
         }
     }
     
+    // 완료 상태 변경
     override func tableView(
         _ tableView: UITableView, didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
-        //        let category = categories[indexPath.section]
-        //        let selectedItem = categorizedItems[category]![indexPath.row]
-        //        toggleItemCompletion(selectedItem)
     }
     
     private func toggleItemCompletion(_ item: TodoItem) {
