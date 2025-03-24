@@ -104,6 +104,7 @@ class TodoTableViewCell: UITableViewCell {
         checkmarkButton.tintColor = .systemGray
         
         contentView.backgroundColor = item.isDone ? .systemGray.withAlphaComponent(0.5) : .white
+  
         if !item.isDone {
             switch item.priority {
             case "Low":
@@ -113,9 +114,10 @@ class TodoTableViewCell: UITableViewCell {
             case "High":
                 priorityLabel.textColor = .systemRed
             default:
-                priorityLabel.textColor = .clear
                 break
             }
+        } else {
+            priorityLabel.textColor = .systemGray
         }
         // 텍스트 설정
         titleLabel.text = item.todo
@@ -140,7 +142,6 @@ class TodoTableViewCell: UITableViewCell {
 #Preview {
     UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()!
 }
-
 
 
 

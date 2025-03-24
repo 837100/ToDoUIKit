@@ -42,7 +42,7 @@ class TodoTableViewController: UITableViewController {
     func configureTableView() {
         // 커스텀 셀 등록
         tableView.register(
-            TodoTableViewCell.self, forCellReuseIdentifier: TodoTableViewCell.reuseIdentifier)
+            TodoTableViewCell.self, forCellReuseIdentifier: "reuseIdentifier")
         tableView.rowHeight = 60
     }
     
@@ -62,7 +62,7 @@ class TodoTableViewController: UITableViewController {
     
     func configureNavigation() {
         title = "할 일"
-        navigationController?.navigationBar.prefersLargeTitles = true
+//        navigationController?.navigationBar.prefersLargeTitles = true
     }
     
     
@@ -158,11 +158,12 @@ class TodoTableViewController: UITableViewController {
     override func tableView(
         _ tableView: UITableView, cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
-       guard let cell = tableView.dequeueReusableCell(
-        withIdentifier: TodoTableViewCell.reuseIdentifier, for: indexPath) as? TodoTableViewCell else {
-        return UITableViewCell()
-       }
-           let category = categories[indexPath.section]
+        guard let cell = tableView.dequeueReusableCell(
+            //        withIdentifier: TodoTableViewCell.reuseIdentifier, for: indexPath) as? TodoTableViewCell else {
+            withIdentifier: "reuseIdentifier", for: indexPath) as? TodoTableViewCell else {
+            return UITableViewCell()
+        }
+        let category = categories[indexPath.section]
         let item = categorizedItems[category]![indexPath.row]
         
         cell.configure(with: item)
@@ -183,9 +184,9 @@ class TodoTableViewController: UITableViewController {
         _ tableView: UITableView, didSelectRowAt indexPath: IndexPath
     ) {
         tableView.deselectRow(at: indexPath, animated: true)
-//        let category = categories[indexPath.section]
-//        let selectedItem = categorizedItems[category]![indexPath.row]
-//        toggleItemCompletion(selectedItem)
+        //        let category = categories[indexPath.section]
+        //        let selectedItem = categorizedItems[category]![indexPath.row]
+        //        toggleItemCompletion(selectedItem)
     }
     
     private func toggleItemCompletion(_ item: TodoItem) {

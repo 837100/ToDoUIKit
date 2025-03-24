@@ -139,7 +139,8 @@ class TodoAddViewController: UIViewController {
 }
 
 #Preview {
-    UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()!
+//    UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController()!
+    TodoAddViewController()
 }
 
 
